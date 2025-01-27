@@ -1,0 +1,30 @@
+# Общие правила для игнорирования
+node_modules/
+.env
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Исключения для IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Системные файлы
+Thumbs.db
+*.db
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# MySQL Workbench
+*.bak
+*.log
+*.tmp
+
+# Логи
+logs/
+*.log
