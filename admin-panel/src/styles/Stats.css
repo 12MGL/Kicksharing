@@ -1,0 +1,37 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    cursor: pointer;
+    background: #f4f4f4;
+  }
+  
+  th:hover {
+    background: #ddd;
+  }
+  
+  td, th {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ccc;
+  }
+  
+  /* для управления видимостью столбцов */
+  .column-controls {
+    margin-bottom: 10px;
+  }
+  
+  .column-controls label {
+    margin-right: 15px;
+    font-size: 14px;
+  }
+  
+  /* скрываем ненужные столбцы автоматически */
+  @media (max-width: 768px) {
+    .hide-mobile {
+      display: none;
+    }
+  }
+  

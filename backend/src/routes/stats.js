@@ -7,7 +7,25 @@ router.get('/', async (req, res) => {
     try {
       const { start_date, end_date, sort_by, order } = req.query;
       
-      let query = `SELECT * FROM repairs WHERE 1=1`;
+      //let query = `SELECT * FROM repairs WHERE 1=1`; 
+      const query = `
+        SELECT 
+          r.id, 
+          r.repair_timestamp, 
+          r.node, 
+          r.repair_type, 
+          r.success,
+          r.scooter_id, 
+          s.serial_number AS scooter_serial_number, 
+          s.registration_number AS scooter_registration_number,
+          r.repairman_id, 
+          u.username AS repairman_name
+        FROM repairs r
+        JOIN scooters s ON r.scooter_id = s.id
+        JOIN users u ON r.repairman_id = u.id
+        ORDER BY r.repair_timestamp DESC;
+      `;
+
       
       //фильтрация по дате
       if (start_date) {
@@ -26,8 +44,8 @@ router.get('/', async (req, res) => {
         }
       }
   
-      const [results] = await db.query(query);
-      res.json(results);
+      const [rows] = await db.query(query);
+      res.json(rows);
     } catch (error) {
       console.error(error);
       res.status(500).send('Server Error');
