@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require("cors");
 const app = express();
 const scootersRoutes = require('./routes/scooters');
 const repairsRoutes = require('./routes/repairs');
@@ -9,6 +10,7 @@ const partsRoutes = require('./routes/parts');
 
 const router = express.Router();
 
+app.use(cors()); //решаем проблему фронта с авторизацией запросов через CORS
 app.use(express.json());
 
 // подключаем маршруты, определённые по схеме базовой структуры
