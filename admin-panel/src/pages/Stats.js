@@ -10,13 +10,20 @@ const formatDate = (isoString) => {     //форматируем дату под
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).replace(",", ""); // 
+    }).replace(",", ""); //убираем лишнюю запятую
   };
 
 const Stats = () => {
   const [stats, setStats] = useState([]);
   const [sortField, setSortField] = useState("repair_timestamp"); //для сортировки
   const [sortOrder, setSortOrder] = useState("asc"); //сортировка по порядку или в обратном порядке
+
+  const [filteredStats, setFilteredStats] = useState([]); //добавляем фильтры
+  const [filterSuccess, setFilterSuccess] = useState("all"); //по успешности 
+  const [filterRepairman, setFilterRepairman] = useState("all"); // по ремонтнику
+  const [filterDateFrom, setFilterDateFrom] = useState(""); // фильтр для даты
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [repairmen, setRepairmen] = useState([]);
 
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
@@ -35,7 +42,12 @@ const Stats = () => {
     const fetchStats = async () => {
       const data = await getStats();
       console.log("Полученные данные:", data); //дебажноэ
-      setStats(data);
+    //   setFilteredStats(data);
+      setStats(data); 
+      const uniqueRepairmen = [...new Set(data.map(item => item.repairman_name))];  //группировка ремонтников для фильтрации, уникальные имена
+      setRepairmen(uniqueRepairmen);
+      setFilteredStats(data); 
+      // setStats(data);
     };
 
     fetchStats();
@@ -50,15 +62,84 @@ const Stats = () => {
     setSortField(field);
     setSortOrder(order);
 
-    const sortedData = [...stats].sort((a, b) => {
+    const sortedData = [...filteredStats].sort((a, b) => {
         if (a[field] < b[field]) return order === "asc" ? -1 : 1;
         if (a[field] > b[field]) return order === "asc" ? 1 : -1;
         return 0;
-      });
-  
-      setStats(sortedData);
-    };
+    });
 
+    setFilteredStats(sortedData);
+};
+
+    useEffect(() => {        //функция для фильтров
+
+        if (!stats || stats.length === 0) {
+            console.log("Данные ещё не загружены, не фильтруем.");
+            return;
+        }
+        console.log("Фильтры обновлены. Обновляем таблицу..."); //дебажноэ
+        let filtered = [...stats];
+        console.log("Исходные данные перед фильтрацией:", stats); //дебажноэ
+
+        if (filterSuccess !== "all") {        //по успешности ремонта
+        filtered = filtered.filter(item => {
+            // filterSuccess === "success" ? item.success : !item.success
+            const match = filterSuccess === "success" ? item.success : !item.success;
+            if (!match) console.log("Фильтр по успешности ОТБРАСЫВАЕТ:", item);     //дебажноэ
+            return match;
+        });
+        }
+
+        if (filterRepairman !== "all") {        //по ремонтнику
+        filtered = filtered.filter((item) => {
+            //item => item.repairman_name === filterRepairman
+            const match = item.repairman_name === filterRepairman;
+            if (!match) console.log("Фильтр по ремонтнику ОТБРАСЫВАЕТ:", item); //дебажноэ
+            return match;    
+        });
+        }
+
+        if (filterDateFrom) {        //по дате
+        //filtered = filtered.filter(item => new Date(item.repair_timestamp) >= new Date(filterDateFrom));
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.repair_timestamp);
+            const fromDate = new Date(filterDateFrom);
+            const match = itemDate >= fromDate;
+            if (!match) console.log("Фильтр по дате С (отбрасывает):", item, "Т.к. дата:", itemDate);   //дебажноэ
+            return match;
+        });
+        }
+        if (filterDateTo) {
+        //filtered = filtered.filter(item => new Date(item.repair_timestamp) <= new Date(filterDateTo));
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.repair_timestamp);
+            const toDate = new Date(filterDateTo);
+            const match = itemDate <= toDate;
+            if (!match) console.log("Фильтр по дате ПО (отбрасывает):", item, "Т.к. дата:", itemDate);  //дебажноэ
+            return match;
+        });
+        }
+
+        filtered.sort((a, b) => {    //сортировка отфильтрованного
+            if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
+            if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        console.log("Отфильтрованные данные:", filtered); //дебажноэ
+
+        if (JSON.stringify(filtered) !== JSON.stringify(filteredStats)) {
+            console.log("Обновляем `setFilteredStats`..."); //дебажноэ
+            setFilteredStats(filtered);
+        }
+
+        setFilteredStats(filtered);
+    }, [stats, filterSuccess, filterRepairman, filterDateFrom, filterDateTo, sortField, sortOrder]);
+
+    // useEffect(() => {     
+    //     applyFilters();
+    // }, [filterSuccess, filterRepairman, filterDateFrom, filterDateTo, sortField, sortOrder]);
+    
   return (
     <div style={{ marginLeft: "260px", padding: "20px" }}>
       <h1>Статистика ремонтов</h1>
@@ -74,6 +155,49 @@ const Stats = () => {
             {column}
           </label>
         ))}
+      </div>
+      {/* фильтры */}
+      <div className="filters">
+        <label>
+          Успешность:
+          <select value={filterSuccess} onChange={e => setFilterSuccess(e.target.value)}>
+            <option value="all">Все</option>
+            <option value="success">Успешные</option>
+            <option value="failed">Неуспешные</option>
+          </select>
+        </label>
+
+        <label>
+          Ремонтник:
+          <select value={filterRepairman} onChange={e => setFilterRepairman(e.target.value)}>
+            <option value="all">Все</option>
+            {repairmen.map((name, index) => (
+              <option key={index} value={name}>{name}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Дата с:
+          <input
+            type="date"
+            value={filterDateFrom}
+            onChange={e => setFilterDateFrom(e.target.value)}
+            onBlur={() => setFilterDateFrom(filterDateFrom)} //фильтр срабатывает только после выхода из поля
+            /> 
+        </label>
+
+        <label>
+          Дата по:
+          <input
+            type="date"
+            value={filterDateTo}
+            onChange={e => setFilterDateTo(e.target.value)}
+            onBlur={() => setFilterDateTo(filterDateTo)}
+            />
+        </label>
+
+        <button>Применить</button>
       </div>
         {/* сама табличка, но уже с добавленной функцией видимости столбцов */}
       <table border="1" cellPadding="10">
@@ -92,8 +216,8 @@ const Stats = () => {
           </tr>
         </thead>
         <tbody>
-          {stats.length > 0 ? (
-            stats.map((item) => (
+          {filteredStats.length > 0 ? (
+            filteredStats.map((item) => (
               <tr key={item.id}>
                 {visibleColumns.id && <td>{item.id}</td>}
                 {visibleColumns.repair_timestamp && <td>{formatDate(item.repair_timestamp)}</td>}
