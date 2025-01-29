@@ -71,59 +71,22 @@ router.put('/:id', async (req, res) => {
     }
   });
   
-//статистика по ремонтам для админа: общее количество, количество успешных, количество неуспешных ремонтов.
-// router.get('/stats', async (req, res) => {
-//     try {
-//       const [totalRepairs] = await db.query('SELECT COUNT(*) as total FROM repairs');
-//       const [successfulRepairs] = await db.query('SELECT COUNT(*) as successful FROM repairs WHERE success = TRUE');
-//       const [failedRepairs] = await db.query('SELECT COUNT(*) as failed FROM repairs WHERE success = FALSE');
+//добавление нового ремонта
+router.post('/', async (req, res) => {
+    try {
+      const { scooter_id, repairman_id, repair_timestamp, node, repair_type, success } = req.body;
+      const query = `
+        INSERT INTO repairs (scooter_id, repairman_id, repair_timestamp, node, repair_type, success)
+        VALUES (?, ?, ?, ?, ?, ?)`;
+      
+      const [result] = await db.query(query, [scooter_id, repairman_id, repair_timestamp, node, repair_type, success]);
+      res.status(201).json({ id: result.insertId, message: 'Repair added successfully!' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Server Error');
+    }
+  });
   
-//       res.json({
-//         totalRepairs: totalRepairs[0].total,
-//         successfulRepairs: successfulRepairs[0].successful,
-//         failedRepairs: failedRepairs[0].failed,
-//       });
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ error: 'Database error' });
-//     }
-//   });
-   
-//статистика по ремонтНИКАМ для админов. количество ремонтов / количество УСПЕШНЫХ ремонтов
-// router.get('/stats/repairmen', async (req, res) => {
-//     try {
-//       const [repairmanStats] = await db.query(`
-//         SELECT users.username, COUNT(repairs.id) as totalRepairs, 
-//                SUM(CASE WHEN repairs.success = TRUE THEN 1 ELSE 0 END) as successfulRepairs
-//         FROM repairs
-//         JOIN users ON repairs.repairman_id = users.id
-//         GROUP BY users.username
-//       `);
-  
-//       res.json(repairmanStats);
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ error: 'Database error' });
-//     }
-//   });
-
-//статистика складская. количество использованных при ремонтах запчастей / количество оставшихся на складе запчастей
-// router.get('/stats/parts', async (req, res) => {
-//     try {
-//       const [partsStats] = await db.query(`
-//         SELECT parts.name, SUM(CASE WHEN repairs.repair_type = 'with_parts' THEN 1 ELSE 0 END) as usedRepairs, 
-//                parts.quantity as remainingQuantity
-//         FROM repairs
-//         JOIN parts ON repairs.node = parts.name
-//         GROUP BY parts.name
-//       `);
-  
-//       res.json(partsStats);
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ error: 'Database error' });
-//     }
-//   });
   
   
 

@@ -2,6 +2,10 @@ const express = require('express');
 const app = express();
 const scootersRoutes = require('./routes/scooters');
 const repairsRoutes = require('./routes/repairs');
+const statsRoutes = require('./routes/stats');
+const repairmenStatsRoutes = require('./routes/repairmenStats');
+const partsStatsRoutes = require('./routes/partsStats');
+const partsRoutes = require('./routes/parts');
 
 const router = express.Router();
 
@@ -10,6 +14,10 @@ app.use(express.json());
 // подключаем маршруты, определённые по схеме базовой структуры
 app.use('/scooters', scootersRoutes);
 app.use('/repairs', repairsRoutes);
+app.use('/stats', statsRoutes);
+app.use('/stats/repairmen', repairmenStatsRoutes);
+app.use('/stats/parts', partsStatsRoutes);
+app.use('/parts', partsRoutes);
 app.get('/stats', (req, res) => {
     res.send('Statistics page');
   });
@@ -19,6 +27,8 @@ app.get('/stats/repairmen', (req, res) => {
 app.get('/stats/parts', (req, res) => {
     res.send('Parts statistics page');
     });
+
+
 
 process.on('uncaughtException', function (err) {
     console.log(err);
