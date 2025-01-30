@@ -1,6 +1,7 @@
 const express = require('express');
-const router = express.Router();
+const pool = require('../config/db');
 const db = require('../config/db');
+const router = express.Router();
 
 
 router.get('/', async (req, res) => {
@@ -53,41 +54,34 @@ router.get('/:id', async (req, res) => {
 //на случай, если ремонтник ошибся с данными о ремонте, оставляем возможность изменять их
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { success } = req.body;
+    const { repair_timestamp, node, repair_type, success } = req.body;
   
     if (success === undefined) {
       return res.status(400).json({ error: 'Missing success field' });
     }
   
     try {
-      const [result] = await db.query('UPDATE repairs SET success = ? WHERE id = ?', [success, id]);
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Repair not found' });
-      }
-      res.json({ message: 'Repair updated' });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Database error' });
-    }
-  });
-  
-//добавление нового ремонта
-router.post('/', async (req, res) => {
-    try {
-      const { scooter_id, repairman_id, repair_timestamp, node, repair_type, success } = req.body;
-      const query = `
-        INSERT INTO repairs (scooter_id, repairman_id, repair_timestamp, node, repair_type, success)
-        VALUES (?, ?, ?, ?, ?, ?)`;
-      
-      const [result] = await db.query(query, [scooter_id, repairman_id, repair_timestamp, node, repair_type, success]);
-      res.status(201).json({ id: result.insertId, message: 'Repair added successfully!' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Server Error');
-    }
-  });
-  
-  
-  
+      console.log(`Получен запрос на обновление ремонта ID ${id}`);   //дебажноэ
+        console.log("Данные из запроса:", req.body);   //дебажноэ
 
-module.exports = router;
+        const [result] = await db.execute(
+            "UPDATE repairs SET repair_timestamp = ?, node = ?, repair_type = ?, success = ? WHERE id = ?",
+            [repair_timestamp, node, repair_type, success, id]
+        );
+
+        console.log("Результат выполнения запроса:", result);   //дебажноэ
+
+        if (result.affectedRows > 0) {
+            console.log(`Успешно обновлено: ${result.affectedRows} строк`);
+            res.status(200).json({ message: "Данные успешно обновлены" });
+        } else {
+            console.log("Ошибка: запись не найдена.");
+            res.status(404).json({ message: "Ремонт не найден" });
+        }
+    } catch (error) {
+        console.error("Ошибка при обновлении ремонта:", error);
+        res.status(500).json({ message: "Ошибка сервера", error: error.message });
+    }
+  });
+
+  module.exports = router;

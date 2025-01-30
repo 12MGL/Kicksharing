@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getStats } from "../api";
 import "../styles/Stats.css";
+import { updateRepair } from "../api"; 
 
 const formatDate = (isoString) => {     //форматируем дату под DD-MM-YYY HH:MM. раньше было некрасиво.
     const date = new Date(isoString);
@@ -15,8 +16,8 @@ const formatDate = (isoString) => {     //форматируем дату под
 
 const Stats = () => {
   const [stats, setStats] = useState([]);
-  const [sortField, setSortField] = useState("repair_timestamp"); //для сортировки
-  const [sortOrder, setSortOrder] = useState("asc"); //сортировка по порядку или в обратном порядке
+  const [sortField, setSortField] = useState("id"); //для сортировки по id ремонта
+  const [sortOrder, setSortOrder] = useState("asc"); //сортировка по порядку
 
   const [filteredStats, setFilteredStats] = useState([]); //добавляем фильтры
   const [filterSuccess, setFilterSuccess] = useState("all"); //по успешности 
@@ -42,12 +43,12 @@ const Stats = () => {
     const fetchStats = async () => {
       const data = await getStats();
       console.log("Полученные данные:", data); //дебажноэ
-    //   setFilteredStats(data);
-      setStats(data); 
+      // сортируем данные сразу после получения
+      const sortedData = [...data].sort((a, b) => a.id - b.id);
+      setStats(sortedData); 
+      setFilteredStats(sortedData);
       const uniqueRepairmen = [...new Set(data.map(item => item.repairman_name))];  //группировка ремонтников для фильтрации, уникальные имена
       setRepairmen(uniqueRepairmen);
-      setFilteredStats(data); 
-      // setStats(data);
     };
 
     fetchStats();
@@ -140,8 +141,41 @@ const Stats = () => {
     //     applyFilters();
     // }, [filterSuccess, filterRepairman, filterDateFrom, filterDateTo, sortField, sortOrder]);
     
+    // обработчик кнопки редактирования, должна вызвать модальное окно
+    const [editingItem, setEditingItem] = useState(null); //состояние модального окна
+    const handleEdit = (item) => {
+      setEditingItem(item); //отправляем данные из выбранной строки в состояние editingItem
+    };
+
+    const handleSaveEdit = async () => {  //обработчик для модального окна
+      if (!editingItem) return;
+    
+      console.log("Отправляем данные на сервер:", editingItem);
+    
+      const success = await updateRepair(editingItem.id, {
+        repair_timestamp: editingItem.repair_timestamp,
+        node: editingItem.node,
+        repair_type: editingItem.repair_type,
+        success: editingItem.success,
+      });
+    
+      if (success) {
+        console.log("Данные успешно обновлены!");
+    
+        setStats((prevStats) =>
+          prevStats.map((item) =>
+            item.id === editingItem.id ? { ...editingItem } : item
+          )
+        );
+    
+        setEditingItem(null); //закрываем модальное окно
+      } else {
+        alert("Ошибка при сохранении данных.");
+      }
+    };
+
   return (
-    <div style={{ marginLeft: "260px", padding: "20px" }}>
+    <div style={{ marginLeft: "130px", padding: "20px" }}>
       <h1>Статистика ремонтов</h1>
         {/* возможность скрывать столбцы */}
       <div className="column-controls">
@@ -213,6 +247,7 @@ const Stats = () => {
           {visibleColumns.node && <th onClick={() => handleSort("node")}>Узел</th>}
           {visibleColumns.repair_type && <th onClick={() => handleSort("repair_type")}>Тип ремонта</th>}
           {visibleColumns.success && <th onClick={() => handleSort("success")}>Успешность</th>}
+          <th>Действия</th> {/* для редактирования */}
           </tr>
         </thead>
         <tbody>
@@ -229,6 +264,9 @@ const Stats = () => {
                 {visibleColumns.node && <td>{item.node}</td>}
                 {visibleColumns.repair_type && <td>{item.repair_type}</td>}
                 {visibleColumns.success && <td>{item.success ? "✔" : "✖"}</td>}
+                <td>
+                  <button onClick={() => handleEdit(item)}>Редактировать</button>
+                </td>
               </tr>
             ))
           ) : (
@@ -238,6 +276,60 @@ const Stats = () => {
           )}
         </tbody>
       </table>
+      {/* модальное окно */}
+      {editingItem && (  
+        <div className="modal"> 
+          <h2>Редактирование</h2>
+
+          <label>
+            Дата:
+            <input
+              type="datetime-local"
+              value={editingItem.repair_timestamp}
+              onChange={(e) => setEditingItem({ ...editingItem, repair_timestamp: e.target.value })}
+            />
+          </label>
+
+          <label>
+            Узел:
+            <select
+              value={editingItem.node}
+              onChange={(e) => setEditingItem({ ...editingItem, node: e.target.value })}
+            >
+              <option value="wheel">Колесо</option>
+              <option value="handlebar">Руль</option>
+              <option value="frame">Рама</option>
+              <option value="electronics">Электроника</option>
+            </select>
+          </label>
+
+          <label>
+            Тип ремонта:
+            <select
+              value={editingItem.repair_type}
+              onChange={(e) => setEditingItem({ ...editingItem, repair_type: e.target.value })}
+            >
+              <option value="with_parts">С запчастями</option>
+              <option value="with_consumables">С расходниками</option>
+              <option value="without_parts">Без запчастей</option>
+            </select>
+          </label>
+
+          <label>
+            Успешность:
+            <select
+              value={editingItem.success}
+              onChange={(e) => setEditingItem({ ...editingItem, success: e.target.value === "true" })}
+            >
+              <option value="true">Успешно</option>
+              <option value="false">Неуспешно</option>
+            </select>
+          </label>
+
+          <button onClick={handleSaveEdit}>Сохранить</button>
+          <button onClick={() => setEditingItem(null)}>Отмена</button>
+        </div>
+      )}
     </div>
   );
 };

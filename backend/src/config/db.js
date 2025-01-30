@@ -8,6 +8,11 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME
 });
 
+// дебажноэ
+// pool.getConnection()
+//   .then(() => console.log("✅ База данных подключена!"))
+//   .catch((err) => console.error("❌ Ошибка подключения к базе данных:", err));
+
 // promise-обёртка для асинхронных запросов
 const promisePool = pool.promise();
 
