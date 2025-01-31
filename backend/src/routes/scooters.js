@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
+const { logAdminAction } = require("../utils/logger");
 
 router.get('/', async (req, res) => {
   try {
@@ -16,11 +17,16 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
       const { serial_number, registration_number, model, year, color, mileage, status } = req.body;
+      const adminId = req.headers["admin-id"] || 1; //получаем ID админа для логирования, либо заглушка - 1
       const query = `
         INSERT INTO scooters (serial_number, registration_number, model, year, color, mileage, status)
         VALUES (?, ?, ?, ?, ?, ?, ?)`;
       
       const [result] = await db.query(query, [serial_number, registration_number, model, year, color, mileage, status]);
+      
+      //логируем действия 
+      await logAdminAction(adminId, "Добавил самокат", `ID: ${result.insertId}, Рег.номер: ${registration_number}`);
+
       res.status(201).json({ id: result.insertId, message: 'Scooter added successfully!' });
     } catch (error) {
       console.error(error);
@@ -33,6 +39,7 @@ router.put('/:id', async (req, res) => {
     try {
       const scooterId = req.params.id;
       const { serial_number, registration_number, model, year, color, mileage, status } = req.body;
+      const adminId = req.headers["admin-id"]  || 1; //id админа для логирования либо "1", если невозможно получить
       
       const query = `
         UPDATE scooters
@@ -45,6 +52,9 @@ router.put('/:id', async (req, res) => {
         return res.status(404).json({ message: 'Scooter not found' });
       }
       
+      //логирование действий админа
+      await logAdminAction(adminId, "Редактировал самокат", `ID: ${scooterId}, Рег.номер: ${registration_number}`);
+
       res.json({ message: 'Scooter updated successfully!' });
     } catch (error) {
       console.error(error);

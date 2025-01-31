@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require("cors");
+const cors = require('cors');
 const app = express();
 const scootersRoutes = require('./routes/scooters');
 const repairsRoutes = require('./routes/repairs');
@@ -7,7 +7,8 @@ const statsRoutes = require('./routes/stats');
 const repairmenStatsRoutes = require('./routes/repairmenStats');
 const partsStatsRoutes = require('./routes/partsStats');
 const partsRoutes = require('./routes/parts');
-const repairmenRoutes = require("./routes/repairmen");
+const repairmenRoutes = require('./routes/repairmen');
+const logsRoutes = require('./routes/logs');
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ app.use('/repairmen', repairmenRoutes);
 app.use('/stats/repairmen', repairmenStatsRoutes);
 app.use('/stats/parts', partsStatsRoutes);
 app.use('/parts', partsRoutes);
+app.use('/logs', logsRoutes);
 app.get('/stats', (req, res) => {
     res.send('Statistics page');
   });

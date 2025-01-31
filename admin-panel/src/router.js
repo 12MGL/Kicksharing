@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import Scooters from "./pages/Scooters";
 import Parts from "./pages/Parts"; 
 import Repairmen from "./pages/Repairmen"; 
+import Logs from "./pages/Logs";
 
 const AppRouter = () => {
   return (
@@ -18,6 +19,7 @@ const AppRouter = () => {
         <Route path="/scooters" element={<Scooters />} />
         <Route path="/parts" element={<Parts />} /> 
         <Route path="/repairmen" element={<Repairmen />} />
+        <Route path="/logs" element={<Logs />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

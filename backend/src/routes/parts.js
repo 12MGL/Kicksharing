@@ -1,17 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
+const { logAdminAction } = require("../utils/logger");
 
 //добавление новой ЗПЧ
 router.post('/', async (req, res) => {
   try {
     const { article, name, quantity } = req.body;
+    const adminId = req.headers["admin-id"] || 1; //полуачем id админа для логов, либо "1", если невозможно получить
 
     const query = `
       INSERT INTO parts (article, name, quantity)
       VALUES (?, ?, ?)`;
 
     const [result] = await db.query(query, [article, name, quantity]);
+
+    //логируем действия админа
+    await logAdminAction(adminId, "добавил запчасть: ", `ID: ${partId}, название: ${name}`);
 
     res.status(201).json({ id: result.insertId, message: 'Part added successfully!' });
   } catch (error) {
@@ -55,6 +60,7 @@ router.put('/:id', async (req, res) => {
   try {
     const partId = req.params.id;
     const { article, name, quantity } = req.body;
+    const adminId = req.headers["admin-id"] || 1; //полуачем id админа для логов, либо "1", если невозможно получить
 
     const query = `
       UPDATE parts
@@ -66,6 +72,8 @@ router.put('/:id', async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Part not found' });
     }
+    //логируем действия админа
+    await logAdminAction(adminId, "Редактировал запчасть", `ID: ${partId}, название: ${name}`);
 
     res.json({ message: 'Part updated successfully!' });
   } catch (error) {

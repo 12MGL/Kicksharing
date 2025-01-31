@@ -216,3 +216,14 @@ export const getRepairmanRepairs = async (repairmanId) => {
       return [];
   }
 };
+
+//получение админских логов
+export const getAdminLogs = async () => {
+  try {
+      const response = await axios.get("http://localhost:3000/logs");
+      return response.data;
+  } catch (error) {
+      console.error("Ошибка при загрузке логов:", error);
+      return [];
+  }
+};

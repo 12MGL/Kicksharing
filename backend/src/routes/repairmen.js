@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const bcrypt = require("bcrypt"); //для хеширования паролей
+const { logAdminAction } = require("../utils/logger");
 
 //получения списска всех ремонтников
 // router.get("/", async (req, res) => {
@@ -46,6 +47,8 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { username, photo, specialization, service_center_id } = req.body;
+    const adminId = req.headers["admin-id"] || 1; //полуачем id админа для логов, либо "1", если невозможно получить
+
     if (!username || !specialization) {
       return res.status(400).json({ message: "Имя и специальность обязательны" });
     }
@@ -54,10 +57,12 @@ router.post("/", async (req, res) => {
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
     const query = `
-  INSERT INTO users (username, password, role, photo, service_center_id, specialization) 
-  VALUES (?, ?, 'repairman', ?, ?, ?)`;
-const [result] = await db.query(query, [username, hashedPassword, photo || null, service_center_id || null, specialization]);
-
+      INSERT INTO users (username, password, role, photo, service_center_id, specialization) 
+      VALUES (?, ?, 'repairman', ?, ?, ?)`;
+    const [result] = await db.query(query, [username, hashedPassword, photo || null, service_center_id || null, specialization]);
+ 
+    //логируем действия админа
+    await logAdminAction(adminId, "добавил ремонтника: ", `ID: ${result.insertId}, имя: ${username}`);
 
     res.json({ message: "Ремонтник добавлен!", id: result.insertId });
   } catch (error) {
@@ -71,6 +76,7 @@ router.put("/:id", async (req, res) => {
   try {
     const repairmanId = req.params.id;
     const { username, photo, specialization, service_center_id } = req.body;
+    const adminId = req.headers["admin-id"] || 1; //полуачем id админа для логов, либо "1", если невозможно получить
 
     const query = `
       UPDATE users 
@@ -81,6 +87,9 @@ router.put("/:id", async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Ремонтник не найден" });
     }
+    
+    //логируем действия админа
+    await logAdminAction(adminId, "Редактировал ремонтника", `ID: ${repairmanId}, Имя: ${username}`);
 
     res.json({ message: "Данные обновлены!" });
   } catch (error) {
