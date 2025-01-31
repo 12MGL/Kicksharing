@@ -10,6 +10,9 @@ const Sidebar = () => {
         <ul>
           <li><Link to="/">Главная</Link></li>
           <li><Link to="/stats">Статистика</Link></li>
+          <li><Link to="/scooters">Список самокатов</Link></li>
+          <li><Link to="/parts">Склад запчастей</Link></li>
+          <li><Link to="/repairmen">Ремонтники</Link></li>
         </ul>
       </nav>
     </div>

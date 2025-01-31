@@ -7,6 +7,7 @@ const statsRoutes = require('./routes/stats');
 const repairmenStatsRoutes = require('./routes/repairmenStats');
 const partsStatsRoutes = require('./routes/partsStats');
 const partsRoutes = require('./routes/parts');
+const repairmenRoutes = require("./routes/repairmen");
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/scooters', scootersRoutes);
 app.use('/repairs', repairsRoutes);
 app.use('/stats', statsRoutes);
+app.use('/repairmen', repairmenRoutes);
 app.use('/stats/repairmen', repairmenStatsRoutes);
 app.use('/stats/parts', partsStatsRoutes);
 app.use('/parts', partsRoutes);

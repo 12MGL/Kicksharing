@@ -19,10 +19,13 @@ router.get('/', async (req, res) => {
           s.serial_number AS scooter_serial_number, 
           s.registration_number AS scooter_registration_number,
           r.repairman_id, 
-          u.username AS repairman_name
+          u.username AS repairman_name,
+          sc.id AS service_center_id, 
+          sc.name AS service_center_name
         FROM repairs r
         JOIN scooters s ON r.scooter_id = s.id
         JOIN users u ON r.repairman_id = u.id
+        LEFT JOIN service_centers sc ON r.service_center_id = sc.id
         ORDER BY r.repair_timestamp DESC;
       `;
 

@@ -18,13 +18,15 @@ const Stats = () => {
   const [stats, setStats] = useState([]);
   const [sortField, setSortField] = useState("id"); //для сортировки по id ремонта
   const [sortOrder, setSortOrder] = useState("asc"); //сортировка по порядку
-
   const [filteredStats, setFilteredStats] = useState([]); //добавляем фильтры
   const [filterSuccess, setFilterSuccess] = useState("all"); //по успешности 
   const [filterRepairman, setFilterRepairman] = useState("all"); // по ремонтнику
   const [filterDateFrom, setFilterDateFrom] = useState(""); // фильтр для даты
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterServiceCenter, setFilterServiceCenter] = useState("all");
   const [repairmen, setRepairmen] = useState([]);
+  const [uniqueServiceCenters, setUniqueServiceCenters] = useState([]);
+
 
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
@@ -34,6 +36,7 @@ const Stats = () => {
     scooter_registration_number: true,
     repairman_id: true,
     repairman_name: true,
+    service_center: window.innerWidth > 768, //автоматически скрываем неважные столбцы на мобилках
     node: true,
     repair_type: window.innerWidth > 768, //автоматически скрываем неважные столбцы на мобилках
     success: true,
@@ -45,10 +48,13 @@ const Stats = () => {
       console.log("Полученные данные:", data); //дебажноэ
       // сортируем данные сразу после получения
       const sortedData = [...data].sort((a, b) => a.id - b.id);
-      setStats(sortedData); 
-      setFilteredStats(sortedData);
       const uniqueRepairmen = [...new Set(data.map(item => item.repairman_name))];  //группировка ремонтников для фильтрации, уникальные имена
       setRepairmen(uniqueRepairmen);
+      const uniqueCenters = [...new Set(data.map(item => item.service_center_name).filter(Boolean))];
+      console.log("Уникальные склады:", uniqueCenters); //дебажноэ
+      setUniqueServiceCenters(uniqueCenters);
+      setStats(sortedData); 
+      setFilteredStats(sortedData);
     };
 
     fetchStats();
@@ -119,6 +125,9 @@ const Stats = () => {
             if (!match) console.log("Фильтр по дате ПО (отбрасывает):", item, "Т.к. дата:", itemDate);  //дебажноэ
             return match;
         });
+        }
+        if (filterServiceCenter !== "all") {
+          filtered = filtered.filter(item => item.service_center_name === filterServiceCenter);
         }
 
         filtered.sort((a, b) => {    //сортировка отфильтрованного
@@ -231,6 +240,18 @@ const Stats = () => {
             />
         </label>
 
+        <label>
+          Склад:
+          <select value={filterServiceCenter} onChange={e => setFilterServiceCenter(e.target.value)}>
+            <option value="all">Все</option>
+            {uniqueServiceCenters.map((name, index) => (
+              <option key={index} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <button>Применить</button>
       </div>
         {/* сама табличка, но уже с добавленной функцией видимости столбцов */}
@@ -244,6 +265,7 @@ const Stats = () => {
           {visibleColumns.scooter_registration_number && <th onClick={() => handleSort("scooter_registration_number")}>Регистрационный номер</th>}
           {visibleColumns.repairman_id && <th onClick={() => handleSort("repairman_id")}>Ремонтник</th>}
           {visibleColumns.repairman_name && <th onClick={() => handleSort("repairman_name")}>Ремонтник</th>}
+          {visibleColumns.service_center && <th onClick={() => handleSort("service_center")}>Склад</th>}
           {visibleColumns.node && <th onClick={() => handleSort("node")}>Узел</th>}
           {visibleColumns.repair_type && <th onClick={() => handleSort("repair_type")}>Тип ремонта</th>}
           {visibleColumns.success && <th onClick={() => handleSort("success")}>Успешность</th>}
@@ -261,6 +283,7 @@ const Stats = () => {
                 {visibleColumns.scooter_registration_number && <td>{item.scooter_registration_number}</td>}
                 {visibleColumns.repairman_id && <td>{item.repairman_id}</td>}
                 {visibleColumns.repairman_name && <td>{item.repairman_name}</td>}
+                {visibleColumns.service_center && <td>{item.service_center_name || "Не указан"}</td>}
                 {visibleColumns.node && <td>{item.node}</td>}
                 {visibleColumns.repair_type && <td>{item.repair_type}</td>}
                 {visibleColumns.success && <td>{item.success ? "✔" : "✖"}</td>}
