@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import { getStats } from "../api";
 import "../styles/Stats.css";
 import { updateRepair } from "../api"; 
+import { formatDate } from "../utils";
 
-const formatDate = (isoString) => {     //форматируем дату под DD-MM-YYY HH:MM. раньше было некрасиво.
-    const date = new Date(isoString);
-    return date.toLocaleString("ru-RU", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).replace(",", ""); //убираем лишнюю запятую
-  };
+
+// const formatDate = (isoString) => {     //форматируем дату под DD-MM-YYY HH:MM. раньше было некрасиво.
+//     const date = new Date(isoString);
+//     return date.toLocaleString("ru-RU", {
+//       day: "2-digit",
+//       month: "2-digit",
+//       year: "numeric",
+//       hour: "2-digit",
+//       minute: "2-digit",
+//     }).replace(",", ""); //убираем лишнюю запятую
+//   };
 
 const Stats = () => {
   const [stats, setStats] = useState([]);
@@ -144,7 +146,7 @@ const Stats = () => {
         }
 
         setFilteredStats(filtered);
-    }, [stats, filterSuccess, filterRepairman, filterDateFrom, filterDateTo, sortField, sortOrder]);
+    }, [stats, filterSuccess, filterRepairman, filterDateFrom, filterDateTo, filterServiceCenter, sortField, sortOrder]);
 
     // useEffect(() => {     
     //     applyFilters();
@@ -250,9 +252,7 @@ const Stats = () => {
               </option>
             ))}
           </select>
-        </label>
-
-        <button>Применить</button>
+        </label>9
       </div>
         {/* сама табличка, но уже с добавленной функцией видимости столбцов */}
       <table border="1" cellPadding="10">

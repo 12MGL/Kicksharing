@@ -15,13 +15,25 @@ const bcrypt = require("bcrypt"); //для хеширования паролей
 // });
 router.get("/", async (req, res) => {
     try {
+      // const query = `
+      //   SELECT users.id, users.username, users.photo, users.specialization, users.service_center_id,
+      //          service_centers.name AS service_center_name
+      //   FROM users
+      //   LEFT JOIN service_centers ON users.service_center_id = service_centers.id
+      //   WHERE users.role = 'repairman'
+      // `;
       const query = `
         SELECT users.id, users.username, users.photo, users.specialization, users.service_center_id,
-               service_centers.name AS service_center_name
+              service_centers.name AS service_center_name,
+              COUNT(repairs.id) AS total_repairs,
+              SUM(CASE WHEN repairs.success = 1 THEN 1 ELSE 0 END) AS successful_repairs
         FROM users
         LEFT JOIN service_centers ON users.service_center_id = service_centers.id
+        LEFT JOIN repairs ON users.id = repairs.repairman_id
         WHERE users.role = 'repairman'
-      `;
+        GROUP BY users.id
+        `;
+
       const [rows] = await db.query(query);
       res.json(rows);
     } catch (error) {
@@ -87,6 +99,30 @@ router.get("/service-centers", async (req, res) => {
       res.status(500).json({ message: "Ошибка сервера" });
     }
   });
+
+//получение списка всех ремонтов ремонтника
+router.get("/:id/repairs", async (req, res) => {
+  try {
+      const repairmanId = req.params.id;
+      const query = `
+          SELECT r.id, r.repair_timestamp, r.node, r.repair_type, r.success, 
+                 s.registration_number AS scooter_registration_number,
+                 u.username AS repairman_name
+          FROM repairs r
+          JOIN scooters s ON r.scooter_id = s.id
+          JOIN users u ON r.repairman_id = u.id
+          WHERE r.repairman_id = ?
+          ORDER BY r.repair_timestamp DESC
+      `;
+      const [repairs] = await db.query(query, [repairmanId]);
+
+      res.json(repairs);
+  } catch (error) {
+      console.error("Ошибка при получении истории ремонтов ремонтника:", error);
+      res.status(500).json({ message: "Ошибка сервера" });
+  }
+});
+
   
 
 module.exports = router;

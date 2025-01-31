@@ -183,3 +183,36 @@ export const getServiceCenters = async () => {
     return [];
   }
 };
+
+//получение истории ремонтов самоката по id
+export const getScooterRepairs = async (scooterId) => {
+  try {
+      const response = await axios.get(`http://localhost:3000/scooters/${scooterId}/repairs`);
+      return response.data;
+  } catch (error) {
+      console.error("Ошибка при загрузке истории ремонтов:", error);
+      return [];
+  }
+};
+
+//получение всех данных о скутере по id
+// export const getScooterById = async (scooterId) => {
+//   try {
+//       const response = await axios.get(`http://localhost:3000/scooters/${scooterId}`);
+//       return response.data;
+//   } catch (error) {
+//       console.error("Ошибка при загрузке данных самоката:", error);
+//       return null;
+//   }
+// };
+
+//получение всех ремонтов конкретного ремонтника
+export const getRepairmanRepairs = async (repairmanId) => {
+  try {
+      const response = await axios.get(`http://localhost:3000/repairmen/${repairmanId}/repairs`);
+      return response.data;
+  } catch (error) {
+      console.error("Ошибка при получении истории ремонтов ремонтника:", error);
+      return [];
+  }
+};

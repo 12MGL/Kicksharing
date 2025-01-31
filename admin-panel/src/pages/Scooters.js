@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { getScooters, updateScooter, addScooter } from "../api";
+import { getScooters, updateScooter, addScooter, getScooterRepairs } from "../api";
+import { formatDate } from "../utils";
+
 //import "../styles/Scooters.css";
 
 const Scooters = () => {
-  const [scooters, setScooters] = useState([]);
-  const [editingScooter, setEditingScooter] = useState(null);
-  const [filters, setFilters] = useState({ model: "", year: "", status: "" });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [addingScooter, setAddingScooter] = useState(false);
+  const [scooters, setScooters] = useState([]); //таблица самокатов
+  const [editingScooter, setEditingScooter] = useState(null); //редактирование самоката
+  const [filters, setFilters] = useState({ model: "", year: "", status: "" });  //фильтрация
+  const [searchQuery, setSearchQuery] = useState(""); //поиск по самокатам
+  const [addingScooter, setAddingScooter] = useState(false);  //добавление самоката
+  const [selectedScooter, setSelectedScooter] = useState(null); //выбор самоката (для реализации истории ремонтов)
+  const [scooterRepairs, setScooterRepairs] = useState([]); //ремонты самоката
 
   useEffect(() => {
-    fetchScooters();  
-  }, []);
+      fetchScooters(); 
+    }, []);
 
   const fetchScooters = async () => {
     const data = await getScooters();
@@ -64,6 +68,33 @@ const Scooters = () => {
           alert("Ошибка при добавлении самоката.");
         }
       };
+    
+    //загрузка истории ремонтов 
+    const handleShowRepairs = async (scooterId) => {
+      try {
+        const repairs = await getScooterRepairs(scooterId);
+        console.log("История ремонтов (ответ сервера):", repairs);
+
+        setScooterRepairs(repairs);
+
+        //находим регистрационный номер самоката для отображении его в истории ремонтов в заголовке (ну и вообще когда понадобится)
+        setSelectedScooter({
+            id: scooterId,
+            registration_number: repairs[0]?.registration_number || "Неизвестен"
+        });
+
+      } catch (error) {
+          console.error("Ошибка при загрузке истории ремонтов:", error);
+      }
+
+      // const repairs = await getScooterRepairs(scooterId);
+      // console.log("История ремонтов (ответ сервера):", repairs); //дебажноэ
+      // setScooterRepairs(repairs);
+      // setSelectedScooter(scooterId);
+    };
+
+    console.log(selectedScooter) //дебажноэ
+    console.log(selectedScooter?.registration_number); //дебажноэ
 
   return (
     <div className="scooters-container" style={{ marginLeft: "130px", padding: "20px" }}>
@@ -134,7 +165,8 @@ const Scooters = () => {
               <td>{scooter.mileage}</td>
               <td>{scooter.status}</td>
               <td>
-                <button onClick={() => handleEdit(scooter)}>Редактировать</button>
+                <button onClick={() => handleEdit(scooter)} style={{marginRight:'5px'}}>Редактировать</button>
+                <button onClick={() => handleShowRepairs(scooter.id)} style={{marginRight:'5px'}}>История ремонтов</button>
               </td>
             </tr>
           ))}
@@ -206,6 +238,44 @@ const Scooters = () => {
           <button onClick={() => setAddingScooter(false)}>Отмена</button>
         </div>
       )}
+      {selectedScooter && (
+        <div className="modal">
+            <h2>История ремонтов самоката {selectedScooter?.registration_number || "Неизвестен"}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID ремонта</th>
+                        <th>Дата</th>
+                        <th>Узел</th>
+                        <th>Тип ремонта</th>
+                        <th>Ремонтник</th>
+                        <th>Склад</th>
+                        <th>Успешность</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {scooterRepairs.length > 0 ? (
+                        scooterRepairs.map((repair) => (
+                            <tr key={repair.id}>
+                                <td>{repair.id}</td>
+                                <td>{formatDate(repair.repair_timestamp)}</td>
+                                <td>{repair.node}</td>
+                                <td>{repair.repair_type}</td>
+                                <td>{repair.repairman_name || "Не указан"}</td>
+                                <td>{repair.service_center_name || "Не указан"}</td>
+                                <td>{repair.success ? "✔" : "✖"}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="7">Ремонты не найдены</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+            <button onClick={() => setSelectedScooter({ id: scooterId, registration_number: repairs[0]?.registration_number || "Неизвестен" })}>Закрыть</button>
+        </div>
+    )}
     </div>
   );
 };

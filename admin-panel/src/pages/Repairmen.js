@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getRepairmen, updateRepairman, addRepairman, getServiceCenters } from "../api";
+import { getRepairmen, updateRepairman, addRepairman, getServiceCenters, getRepairmanRepairs } from "../api";
+import { formatDate } from "../utils";
 //import "../styles/Repairmen.css";
 
 //многое взято из Scooters и Parts
@@ -16,6 +17,8 @@ const Repairmen = () => {
     specialization: "",
     service_center_id: ""
   });
+  const [selectedRepairman, setSelectedRepairman] = useState(null);
+  const [repairmanRepairs, setRepairmanRepairs] = useState([]);
   
 
 
@@ -76,6 +79,32 @@ const Repairmen = () => {
      );
   };
 
+  // const handleShowRepairs = async (repairmanId) => {
+  //   try {
+  //       const repairs = await getRepairmanRepairs(repairmanId);
+  //       console.log("История ремонтов ремонтника:", repairs);
+
+  //       setRepairmanRepairs(repairs);
+
+  //       //имя ремонтника выцепляем отдельно. 
+  //       setSelectedRepairman({
+  //           id: repairmanId,
+  //           username: repairs[0]?.repairman_name || "Неизвестен"
+  //       });
+
+  //     } catch (error) {
+  //         console.error("Ошибка при загрузке истории ремонтов:", error);
+  //     }
+  // };
+
+  const handleShowRepairs = async (repairman) => {
+    setSelectedRepairman(repairman); //cохраняем все данные о ремонтнике
+    const data = await getRepairmanRepairs(repairman.id);
+    setRepairmanRepairs(data);
+};
+
+
+
   return (
     <div className="repairmen-container" style={{ marginLeft: "130px", padding: "20px" }}>
       <h1>Ремонтники</h1>
@@ -114,6 +143,8 @@ const Repairmen = () => {
             <th>Специальность</th>
             <th>Сервисный центр</th>
             <th>Склад</th>
+            <th>Общее количество ремонтов</th>
+            <th>Успешные ремонты</th>
             <th>Действия</th>
           </tr>
         </thead>
@@ -128,8 +159,11 @@ const Repairmen = () => {
               <td>{repairman.specialization}</td>
               <td>{repairman.service_center_id}</td>
               <td>{repairman.service_center_name || "Не указан"}</td>
+              <td>{repairman.total_repairs || 0}</td>
+              <td>{repairman.successful_repairs || 0}</td>
               <td>
-                <button onClick={() => handleEdit(repairman)}>Редактировать</button>
+                <button onClick={() => handleEdit(repairman)} style={{marginRight:'5px'}}>Редактировать</button>
+                <button onClick={() => handleShowRepairs(repairman/*.id*/)} style={{marginRight:'5px'}}>История ремонтов</button>
               </td>
             </tr>
           ))}
@@ -229,7 +263,45 @@ const Repairmen = () => {
             <button onClick={() => setAddingRepairman(false)}>Отмена</button>
         </div>
         )}
-
+        {/* история ремонтов ремонтника */}
+        {repairmanRepairs.length > 0 ? (
+          <div className="modal">
+            <h2>История ремонтов ремонтника {selectedRepairman ? selectedRepairman.username : "Неизвестен"}</h2>
+            <table border="1" cellPadding="10">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Дата</th>
+                        <th>Самокат</th>
+                        <th>Узел</th>
+                        <th>Тип ремонта</th>
+                        <th>Успешность</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  {repairmanRepairs.map((repair) => (
+                    <tr key={repair.id}>
+                        <td>{repair.id}</td>
+                        <td>{formatDate(repair.repair_timestamp)}</td>
+                        <td>{repair.scooter_registration_number || "Неизвестен"}</td>
+                        <td>{repair.node}</td>
+                        <td>{repair.repair_type}</td>
+                        <td>{repair.success ? "✔" : "✖"}</td>
+                    </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button onClick={() => setRepairmanRepairs([])}>Закрыть</button>
+              </div>
+            ) : (
+              selectedRepairman && (
+                  <div className="modal">
+                      <h2>История ремонтов ремонтника {selectedRepairman?.username || "Неизвестен"}</h2>
+                      <p>Ремонтник {selectedRepairman?.username} пока не имеет ремонтов.</p>
+                      <button onClick={() => setSelectedRepairman(null)}>Закрыть</button>
+                  </div>
+              )
+          )}
     </div>
   );
 };

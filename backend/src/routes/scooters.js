@@ -52,5 +52,28 @@ router.put('/:id', async (req, res) => {
     }
   });
   
+  //получение всех ремонтов самоката
+  router.get("/:id/repairs", async (req, res) => {
+    try {
+        const scooterId = req.params.id;
+        const query = `
+            SELECT r.id, r.repair_timestamp, r.node, r.repair_type, r.success, 
+            u.username AS repairman_name, sc.name AS service_center_name, s.registration_number
+            FROM repairs r
+            JOIN scooters s ON r.scooter_id = s.id
+            LEFT JOIN users u ON r.repairman_id = u.id
+            LEFT JOIN service_centers sc ON u.service_center_id = sc.id
+            WHERE r.scooter_id = ?
+            ORDER BY r.repair_timestamp DESC
+        `;
+        const [repairs] = await db.query(query, [scooterId]);
+
+        res.json(repairs);
+    } catch (error) {
+        console.error("Ошибка при получении истории ремонтов самоката:", error);
+        res.status(500).json({ message: "Ошибка сервера" });
+    }
+  });
+
 
 module.exports = router;
