@@ -14,27 +14,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-//добавление нового ремонта
-router.post('/', async (req, res) => {
-    const { scooter_id, repairman_id, repair_timestamp, node, repair_type, success } = req.body;
-  
-    if (!scooter_id || !repairman_id || !repair_timestamp || !node || !repair_type || success === undefined) {
-      return res.status(400).json({ error: 'Missing required fields' }); //типичная проверка на заполнение всех полей
-    }
-  
-    try {
-      const [result] = await db.query(
-        'INSERT INTO repairs (scooter_id, repairman_id, repair_timestamp, node, repair_type, success) VALUES (?, ?, ?, ?, ?, ?)',
-        [scooter_id, repairman_id, repair_timestamp, node, repair_type, success] //в repairs добавляем данные о ремонте
-      );
-      res.status(201).json({ message: 'Repair created', id: result.insertId });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Database error' });
-    }
-  });
-
 //получаем инфу о конкретном ремонте
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
@@ -52,35 +31,92 @@ router.get('/:id', async (req, res) => {
   });
 
 //на случай, если ремонтник ошибся с данными о ремонте, оставляем возможность изменять их
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
+  try {
     const { id } = req.params;
-    const { repair_timestamp, node, repair_type, success } = req.body;
-  
+    const { node, repair_type, success } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID ремонта обязателен." });
+    }
+
     if (success === undefined) {
-      return res.status(400).json({ error: 'Missing success field' });
+      return res.status(400).json({ message: "Поле 'success' обязательно." });
+    }
+
+    console.log(`Получен запрос на обновление ремонта ID ${id}`);
+    console.log("Данные из запроса:", { node, repair_type, success });
+
+    const query = `
+      UPDATE repairs 
+      SET node = ?, repair_type = ?, success = ? 
+      WHERE id = ?`;
+
+    const [result] = await db.query(query, [
+      node || null, 
+      repair_type || null, 
+      success, 
+      id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Ремонт не найден" });
+    }
+
+    res.json({ success: true, message: "Ремонт обновлён!" });
+    } catch (error) {
+      console.error("Ошибка при обновлении ремонта:", error);
+      res.status(500).json({ message: "Ошибка сервера" });
+    }
+  });
+
+
+  //добавление нового ремонта 
+  router.post("/", async (req, res) => {
+    try {
+      const { scooter_id, repairman_id, service_center_id, repair_timestamp, node, repair_type, success } = req.body;
+
+      console.log("Данные от фронта:", req.body);  //дебажноэ
+
+      if (!scooter_id || !repairman_id || !repair_timestamp || !node || !repair_type || success === undefined) {
+        return res.status(400).json({ error: "Missing required fields" });
     }
   
-    try {
-      console.log(`Получен запрос на обновление ремонта ID ${id}`);   //дебажноэ
-        console.log("Данные из запроса:", req.body);   //дебажноэ
+      console.log("Получен запрос на добавление ремонта:");
+      console.log({ scooter_id, repairman_id, success }); //дебажноэ
+  
+      const query = `
+        INSERT INTO repairs (scooter_id, repairman_id, service_center_id, repair_timestamp, node, repair_type, success) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+  
+      console.log("SQL Запрос:", query);  //дебажноэ
+      console.log("Параметры:", [   //дебажноэ
+          scooter_id, 
+          repairman_id, 
+          service_center_id ?? null, //если вдруг service_center_id не пришёл, передаём NULL
+          repair_timestamp, 
+          node, 
+          repair_type, 
+          success
+      ]);
 
-        const [result] = await db.execute(
-            "UPDATE repairs SET repair_timestamp = ?, node = ?, repair_type = ?, success = ? WHERE id = ?",
-            [repair_timestamp, node, repair_type, success, id]
-        );
+      const [result] = await db.query(query, [
+        scooter_id, 
+        repairman_id, 
+        service_center_id ?? null, //если вдруг service_center_id не пришёл, передаём NULL
+        repair_timestamp, 
+        node, 
+        repair_type, 
+        success
+    ]);
+  
+      //res.json({ success: true, message: "Ремонт успешно добавлен!", repair_id: result.insertId });
+      res.json({ success: true, message: "Ремонт успешно добавлен!", insertId: result.insertId });
 
-        console.log("Результат выполнения запроса:", result);   //дебажноэ
-
-        if (result.affectedRows > 0) {
-            console.log(`Успешно обновлено: ${result.affectedRows} строк`);
-            res.status(200).json({ message: "Данные успешно обновлены" });
-        } else {
-            console.log("Ошибка: запись не найдена.");
-            res.status(404).json({ message: "Ремонт не найден" });
-        }
     } catch (error) {
-        console.error("Ошибка при обновлении ремонта:", error);
-        res.status(500).json({ message: "Ошибка сервера", error: error.message });
+      console.error("Ошибка при добавлении ремонта:", error);
+      res.status(500).json({ message: "Ошибка сервера" });
     }
   });
 

@@ -85,5 +85,62 @@ router.put('/:id', async (req, res) => {
     }
   });
 
+  //поиск конкретного самоката
+  router.get("/search", async (req, res) => {
+    try {
+      const query = req.query.query;
+      if (!query) return res.status(400).json({ message: "Введите номер самоката" });
+  
+      const sql = `
+        SELECT * FROM scooters 
+        WHERE serial_number = ? OR registration_number = ?
+      `;
+      const [rows] = await db.query(sql, [query, query]);
+  
+      if (rows.length === 0) return res.status(404).json({ message: "Самокат не найден" });
+  
+      res.json(rows[0]);
+    } catch (error) {
+      console.error("Ошибка поиска самоката:", error);
+      res.status(500).json({ message: "Ошибка сервера" });
+    }
+  });
+
+  //получение инфы о конкретном самокате
+  router.get("/:id/details", async (req, res) => {
+    try {
+      const scooterId = req.params.id;
+  
+      const scooterQuery = `
+        SELECT * FROM scooters WHERE id = ?
+      `;
+      const [scooterRows] = await db.query(scooterQuery, [scooterId]);
+  
+      if (scooterRows.length === 0) {
+        return res.status(404).json({ message: "Самокат не найден" });
+      }
+  
+      const complaintsQuery = `
+        SELECT * FROM complaints WHERE scooter_id = ?
+      `;
+      const [complaintsRows] = await db.query(complaintsQuery, [scooterId]);
+  
+      const repairsQuery = `
+        SELECT repair_timestamp AS timestamp, node, repair_type, success
+        FROM repairs WHERE scooter_id = ?
+      `;
+      const [repairsRows] = await db.query(repairsQuery, [scooterId]);
+  
+      res.json({
+        ...scooterRows[0],
+        complaints: complaintsRows,
+        repairs: repairsRows,
+      });
+    } catch (error) {
+      console.error("Ошибка получения данных о самокате:", error);
+      res.status(500).json({ message: "Ошибка сервера" });
+    }
+  });
+  
 
 module.exports = router;
