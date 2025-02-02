@@ -1,0 +1,7 @@
+.page {
+    background-image: url('/public/images/admin-background.png');
+    background-repeat: repeat;
+    background-size: auto;
+    min-height: 100vh;
+  }
+  

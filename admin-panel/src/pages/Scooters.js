@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getScooters, updateScooter, addScooter, getScooterRepairs } from "../api";
 import { formatDate } from "../utils";
-
-//import "../styles/Scooters.css";
+import "../styles/App.css";
 
 const Scooters = () => {
   const [scooters, setScooters] = useState([]); //таблица самокатов
@@ -97,6 +96,7 @@ const Scooters = () => {
     console.log(selectedScooter?.registration_number); //дебажноэ
 
   return (
+    <div className="page">
     <div className="scooters-container" style={{ marginLeft: "130px", padding: "20px" }}>
       <h1>Список самокатов</h1>
       <button style={{ padding: "5px" }} onClick={() => setAddingScooter(true)}>Добавить самокат</button>
@@ -276,6 +276,7 @@ const Scooters = () => {
             <button onClick={() => setSelectedScooter({ id: scooterId, registration_number: repairs[0]?.registration_number || "Неизвестен" })}>Закрыть</button>
         </div>
     )}
+    </div>
     </div>
   );
 };

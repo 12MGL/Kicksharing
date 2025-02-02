@@ -33,7 +33,9 @@ const Home = ({ onSelectScooter }) => {
   };
 
   return (
-    <div>
+    <div className="page">
+      <h2>Ремонт самокатов</h2>
+      <p>Введите номер существующего самоката (для теста можно взять SN-1001)</p>
       <h2>Поиск самоката</h2>
       <input
         type="text"
@@ -54,7 +56,7 @@ const Home = ({ onSelectScooter }) => {
           <p>Модель: {scooter.model}</p>
           <p>Год выпуска: {scooter.year}</p>
           <p>Цвет: {scooter.color}</p>
-          <button onClick={handleSelectScooter}>Выбрать</button>
+          <button onClick={handleSelectScooter}>Начать ремонт</button>
         </div>
       )}
     </div>

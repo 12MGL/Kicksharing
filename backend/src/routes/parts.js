@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
     const [result] = await db.query(query, [article, name, quantity]);
 
     //логируем действия админа
-    await logAdminAction(adminId, "добавил запчасть: ", `ID: ${partId}, название: ${name}`);
+    await logAdminAction(adminId, "добавил запчасть: ", `ID: ${result.insertId}, название: ${name}`);
 
     res.status(201).json({ id: result.insertId, message: 'Part added successfully!' });
   } catch (error) {

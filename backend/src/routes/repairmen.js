@@ -4,25 +4,9 @@ const db = require("../config/db");
 const bcrypt = require("bcrypt"); //для хеширования паролей
 const { logAdminAction } = require("../utils/logger");
 
-//получения списска всех ремонтников
-// router.get("/", async (req, res) => {
-//   try {
-//     const [repairmen] = await db.query("SELECT * FROM users WHERE role = 'repairman'");
-//     res.json(repairmen);
-//   } catch (error) {
-//     console.error("Ошибка при получении списка ремонтников:", error);
-//     res.status(500).json({ message: "Ошибка сервера" });
-//   }
-// });
 router.get("/", async (req, res) => {
     try {
-      // const query = `
-      //   SELECT users.id, users.username, users.photo, users.specialization, users.service_center_id,
-      //          service_centers.name AS service_center_name
-      //   FROM users
-      //   LEFT JOIN service_centers ON users.service_center_id = service_centers.id
-      //   WHERE users.role = 'repairman'
-      // `;
+
       const query = `
         SELECT users.id, users.username, users.photo, users.specialization, users.service_center_id,
               service_centers.name AS service_center_name,
@@ -114,7 +98,8 @@ router.get("/:id/repairs", async (req, res) => {
   try {
       const repairmanId = req.params.id;
       const query = `
-          SELECT r.id, r.repair_timestamp, r.node, r.repair_type, r.success, 
+          SELECT r.id, r.repair_timestamp, r.node, r.repair_type, r.success,
+                 s.serial_number AS scooter_serial_number, 
                  s.registration_number AS scooter_registration_number,
                  u.username AS repairman_name
           FROM repairs r

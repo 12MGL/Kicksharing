@@ -1,8 +1,19 @@
+.page {
+  /*background-image: url('/public/images/page-background.png');
+  background-repeat: repeat;
+  background-size: auto;
+  min-height: 100vh;*/
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a; /* Тёмный фон */
+    /*background-color: #1a1a1a; /* Тёмный фон */
+    background-image: url('/public/images/page-background.png');
+    background-repeat: repeat;
+    background-size: auto;
+    min-height: 100vh;
     color: #fff; /* Белый текст */
   }
   
@@ -13,17 +24,25 @@ body {
   
   .sidebar {
     width: 80px; /* Узкая панель для мобильных */
-    background-color: #ff6600; /* Тёмно-оранжевый */
+    background-image: url('/public/images/sidebar-background1.png');
+    background-repeat: repeat;
+    background-size: auto;
+    min-height: 100vh;
+    /*background-color: #ff6600; /* Тёмно-оранжевый */
     padding: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
+
+
   
   .sidebar h2 {
     font-size: 18px;
     margin-bottom: 10px;
   }
+
+
   
   .sidebar ul {
     list-style: none;
@@ -39,11 +58,20 @@ body {
     text-decoration: none;
     color: #fff;
     font-size: 14px;
+    font-weight: bold;
+    display: block;
+    padding: 10px;
   }
+
+  .sidebar a:hover {
+    border-radius: 10px;
+    background: #34495e;
+    opacity: 0.75;
+    color: white;
+}
   
   .content {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
   }
-  

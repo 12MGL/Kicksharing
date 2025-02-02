@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getParts, updatePart, addPart } from "../api";
-//import "../styles/Parts.css";
+import "../styles/App.css";
 
 //тут всё по аналогии с Scooters.js. почти всё скопировано с него.
 
@@ -52,6 +52,7 @@ const Parts = () => {
   };
 
   return (
+    <div className="page">
     <div className="parts-container" style={{ marginLeft: "130px", padding: "20px" }}>
       <h1>Склад запчастей</h1>
       <button style={{ padding: "5px" }} onClick={() => setAddingPart(true)}>Добавить запчасть</button>
@@ -144,6 +145,7 @@ const Parts = () => {
           <button onClick={() => setAddingPart(false)}>Отмена</button>
         </div>
       )}
+    </div>
     </div>
   );
 };

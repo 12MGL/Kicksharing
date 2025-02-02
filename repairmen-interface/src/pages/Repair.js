@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getScooterDetails, addRepair } from "../api";
 import { useNavigate } from "react-router-dom";
+import "../styles/Layout.css";
 
 const Repair = () => {
   const { id } = useParams(); //получаем id самоката из URL
@@ -9,11 +10,8 @@ const Repair = () => {
   const [node, setNode] = useState(""); //узел
   const [repairType, setRepairType] = useState(""); //тип ремонта
   const [selectedSuccess, setSelectedSuccess] = useState("1"); //успешность ремонта (по умолчанию "успешный")
-
-
-  //заглушки для авторизации (позже заменим на реальные данные)
-  const repairmanId = 2;
-  const serviceCenterId = 4;
+  const [repairman, setRepairman] = useState(null);
+  const [serviceCenterId, setServiceCenterId] = useState(null);
 
   useEffect(() => { //загрузка данных самоката
     const fetchScooterDetails = async () => {
@@ -22,8 +20,12 @@ const Repair = () => {
         setScooter(scooterData);
       }
     };
-
     fetchScooterDetails();
+    const storedUser = JSON.parse(localStorage.getItem("user"));  //подгружаем данные о залогиненном пользователе из localStorage
+    if (storedUser) {
+      setRepairman(storedUser);
+      setServiceCenterId(storedUser.service_center_id);
+    }
   }, [id]);
 
   const navigate = useNavigate();
@@ -36,12 +38,12 @@ const Repair = () => {
 
     const repairData = {
       scooter_id: id,
-      repairman_id: repairmanId,
+      repairman_id: repairman.id,
       service_center_id: serviceCenterId, 
       repair_timestamp: new Date().toISOString().slice(0, 19).replace("T", " "), //время завершения ремонта в подходящем для БД формате
       node, //узел
       repair_type: repairType,  //с запчастями/с расходниками/без запчастей
-      success: Number(selectedSuccess),
+      success: Number(selectedSuccess), //подводим selectedSuccess к числу явно 
     };
 
     console.log("Отправляем данные в API:", repairData); //дебажноэ
@@ -56,7 +58,7 @@ const Repair = () => {
   };
 
   return (
-    <div>
+    <div className="page">
       <h2>Ремонт самоката {scooter ? scooter.registration_number : "Загрузка..."}</h2>
 
       {/* выбор узла */}

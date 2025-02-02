@@ -75,3 +75,49 @@ export const getScooterDetails = async (id) => {
       return [];
     }
   };
+
+  export const getRepairHistory = async (repairmanId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/repairmen/${repairmanId}/repairs`);
+      if (!response.ok) throw new Error("Ошибка загрузки истории ремонтов");
+      return await response.json();
+    } catch (error) {
+      console.error("Ошибка при загрузке истории ремонтов:", error);
+      return [];
+    }
+  };
+
+export const login = async (username, password) => {
+    try {
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.repairman));
+        return { success: true, repairman: data.repairman };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error("Ошибка при авторизации:", error);
+      return { success: false, message: "Ошибка сервера" };
+    }
+  };
+  
+
+  export const changePassword = async (repairman_id, oldPassword, newPassword) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/change-password`, { repairman_id, oldPassword, newPassword });
+      return response.data;
+    } catch (error) {
+      console.error("Ошибка при смене пароля:", error);
+      return { success: false, message: "Ошибка при смене пароля" };
+    }
+  };
+  

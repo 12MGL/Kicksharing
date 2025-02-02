@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getRepairmen, updateRepairman, addRepairman, getServiceCenters, getRepairmanRepairs } from "../api";
 import { formatDate } from "../utils";
-//import "../styles/Repairmen.css";
+import "../styles/App.css";
 
 //многое взято из Scooters и Parts
 
@@ -79,33 +79,14 @@ const Repairmen = () => {
      );
   };
 
-  // const handleShowRepairs = async (repairmanId) => {
-  //   try {
-  //       const repairs = await getRepairmanRepairs(repairmanId);
-  //       console.log("История ремонтов ремонтника:", repairs);
-
-  //       setRepairmanRepairs(repairs);
-
-  //       //имя ремонтника выцепляем отдельно. 
-  //       setSelectedRepairman({
-  //           id: repairmanId,
-  //           username: repairs[0]?.repairman_name || "Неизвестен"
-  //       });
-
-  //     } catch (error) {
-  //         console.error("Ошибка при загрузке истории ремонтов:", error);
-  //     }
-  // };
-
   const handleShowRepairs = async (repairman) => {
     setSelectedRepairman(repairman); //cохраняем все данные о ремонтнике
     const data = await getRepairmanRepairs(repairman.id);
     setRepairmanRepairs(data);
 };
 
-
-
   return (
+    <div className="page">
     <div className="repairmen-container" style={{ marginLeft: "130px", padding: "20px" }}>
       <h1>Ремонтники</h1>
       <button style={{ padding: "5px" }} onClick={() => setAddingRepairman(true)}>Добавить ремонтника</button>
@@ -141,8 +122,8 @@ const Repairmen = () => {
             <th>Имя</th>
             <th>Фото</th>
             <th>Специальность</th>
-            <th>Сервисный центр</th>
-            <th>Склад</th>
+            <th>ID сервис-центра</th>
+            <th>Название сервис-центра</th>
             <th>Общее количество ремонтов</th>
             <th>Успешные ремонты</th>
             <th>Действия</th>
@@ -203,61 +184,36 @@ const Repairmen = () => {
         </div>
       )}
 
-      {/* Модальное окно для добавления */}
-      {/*{addingRepairman && (
-        <div className="modal">
-          <h2>Добавить ремонтника</h2>
-          <input type="text" placeholder="Имя" id="username" />
-          <input type="text" placeholder="Фото (URL)" id="photo" />
-          <input type="text" placeholder="Специальность" id="specialization" />
-          <label>Склад:</label>
-            <select
-                value={newRepairman.service_center_id}
-                onChange={(e) => setNewRepairman({ ...newRepairman, service_center_id: e.target.value })}
-                >
-                <option value="">Выберите склад</option>
-                {serviceCenters.map((center) => (
-                    <option key={center.id} value={center.id}>{center.name}</option>
-                ))}
-            </select>
-          <button onClick={() => handleAddRepairman({
-            username: document.getElementById("username").value,
-            photo: document.getElementById("photo").value,
-            specialization: document.getElementById("specialization").value
-          })}>Сохранить</button>
-          <button onClick={() => setAddingRepairman(false)}>Отмена</button>
-        </div>
-      )}*/}
         {addingRepairman && (
         <div className="modal">
             <h2>Добавить ремонтника</h2>
             <input
-            type="text"
-            placeholder="Имя"
-            value={newRepairman.username}
-            onChange={(e) => setNewRepairman({ ...newRepairman, username: e.target.value })}
-            />
+              type="text"
+              placeholder="Имя"
+              value={newRepairman.username}
+              onChange={(e) => setNewRepairman({ ...newRepairman, username: e.target.value })}
+              />
             <input
-            type="text"
-            placeholder="Фото (URL)"
-            value={newRepairman.photo}
-            onChange={(e) => setNewRepairman({ ...newRepairman, photo: e.target.value })}
-            />
+              type="text"
+              placeholder="Фото (URL)"
+              value={newRepairman.photo}
+              onChange={(e) => setNewRepairman({ ...newRepairman, photo: e.target.value })}
+              />
             <input
-            type="text"
-            placeholder="Специальность"
-            value={newRepairman.specialization}
-            onChange={(e) => setNewRepairman({ ...newRepairman, specialization: e.target.value })}
-            />
+              type="text"
+              placeholder="Специальность"
+              value={newRepairman.specialization}
+              onChange={(e) => setNewRepairman({ ...newRepairman, specialization: e.target.value })}
+              />
             <label>Склад:</label>
             <select
-            value={newRepairman.service_center_id}
-            onChange={(e) => setNewRepairman({ ...newRepairman, service_center_id: e.target.value })}
-            >
-            <option value="">Выберите склад</option>
-            {serviceCenters.map((center) => (
+              value={newRepairman.service_center_id}
+              onChange={(e) => setNewRepairman({ ...newRepairman, service_center_id: e.target.value })}
+              >
+              <option value="">Выберите склад</option>
+              {serviceCenters.map((center) => (
                 <option key={center.id} value={center.id}>{center.name}</option>
-            ))}
+              ))}
             </select>
             <button onClick={() => handleAddRepairman(newRepairman)}>Сохранить</button>
             <button onClick={() => setAddingRepairman(false)}>Отмена</button>
@@ -302,6 +258,7 @@ const Repairmen = () => {
                   </div>
               )
           )}
+    </div>
     </div>
   );
 };
