@@ -14,7 +14,12 @@ const authRoutes = require("./routes/auth");
 
 const router = express.Router();
 
-app.use(cors()); //решаем проблему фронта с авторизацией запросов через CORS
+app.use(cors({ //решаем проблему фронта с авторизацией запросов через CORS
+  origin: '*', //разрешить доступ со всех доменов (чтобы база была доступна с других устройств в сети)
+  methods: ["GET,HEAD,PUT,PATCH,POST,DELETE"],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // подключаем маршруты, определённые по схеме базовой структуры
@@ -27,6 +32,7 @@ app.use('/stats/parts', partsStatsRoutes);
 app.use('/parts', partsRoutes);
 app.use('/logs', logsRoutes);
 app.use("/auth", authRoutes);
+app.use(cors({ origin: "*", credentials: true }));
 
 app.get('/stats', (req, res) => {
     res.send('Statistics page');
@@ -37,6 +43,9 @@ app.get('/stats/repairmen', (req, res) => {
 app.get('/stats/parts', (req, res) => {
     res.send('Parts statistics page');
     });
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });   //проверка доступности ресурса
 
 
 

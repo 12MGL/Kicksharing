@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: qweasd
+      MYSQL_DATABASE: scooter_service
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d #путь к БД
+
+  backend:
+    build: 
+      context: .
+      dockerfile: ./backend/Dockerfile
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: qweasd
+      DB_NAME: scooter_service
+
+  admin-panel:
+    build:
+      context: .
+      dockerfile: ./admin-panel/Dockerfile
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://backend:3000
+    ports:
+      - "8080:80"
+
+  repairmen-interface:
+    build:
+      context: .
+      dockerfile: ./repairmen-interface/Dockerfile
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://backend:3000
+    ports:
+      - "8081:80"
+
+volumes:
+  mysql_data:

@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:3000"; //берём из бэкенда
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";  //делаем динамический ip, чтобы при подключении с внешних устройств, нас пускало на бэкенд
+console.log('ENV API URL:', process.env.REACT_APP_API_URL); //дебажноэ
+console.log('API URL:', API_BASE_URL); //дебажноэ
+
 
 export const getStats = async () => {
   try {
@@ -16,7 +19,7 @@ export const getStats = async () => {
 // функция для обновления данных о ремонтах - для редактирования их из админки
 export const updateRepair = async (id, updatedData) => {
   try {
-    const response = await fetch(`http://localhost:3000/repairs/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/repairs/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +37,7 @@ export const updateRepair = async (id, updatedData) => {
 //функция обновления данных о самокате
 export const updateScooter = async (id, updatedData) => {
   try {
-    const response = await fetch(`http://localhost:3000/scooters/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/scooters/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -53,8 +56,8 @@ export const updateScooter = async (id, updatedData) => {
 //получение списка самокатов
 export const getScooters = async () => {
   try {
-    const response = await fetch("http://localhost:3000/scooters");
-
+    const response = await fetch(`${API_BASE_URL}/scooters`);
+    
     if (!response.ok) {
       throw new Error("Ошибка при загрузке списка самокатов");
     }
@@ -69,7 +72,7 @@ export const getScooters = async () => {
 //получение списка запчастей на складе
 export const getParts = async () => {
   try {
-    const response = await fetch("http://localhost:3000/parts");
+    const response = await fetch(`${API_BASE_URL}/parts`);
     if (!response.ok) {
       throw new Error("Ошибка при загрузке запчастей");
     }
@@ -83,7 +86,7 @@ export const getParts = async () => {
 //обновление данных о запчастях на складе
 export const updatePart = async (id, updatedData) => {
   try {
-    const response = await fetch(`http://localhost:3000/parts/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/parts/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -101,7 +104,7 @@ export const updatePart = async (id, updatedData) => {
 //добавление нового самоката
 export const addScooter = async (scooterData) => {
   try {
-    const response = await fetch("http://localhost:3000/scooters", {
+    const response = await fetch(`${API_BASE_URL}/scooters`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(scooterData),
@@ -117,7 +120,7 @@ export const addScooter = async (scooterData) => {
 //добавление новой запчасти
 export const addPart = async (partData) => {
   try {
-    const response = await fetch("http://localhost:3000/parts", {
+    const response = await fetch(`${API_BASE_URL}/parts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(partData),
@@ -133,7 +136,7 @@ export const addPart = async (partData) => {
 //список всех ремонтников
 export const getRepairmen = async () => {
   try {
-    const response = await fetch("http://localhost:3000/repairmen");
+    const response = await fetch(`${API_BASE_URL}/repairmen`);
     return await response.json();
   } catch (error) {
     console.error("Ошибка при загрузке ремонтников:", error);
@@ -144,7 +147,7 @@ export const getRepairmen = async () => {
 //добавление нового ремонтника
 export const addRepairman = async (repairmanData) => {
   try {
-    const response = await fetch("http://localhost:3000/repairmen", {
+    const response = await fetch(`${API_BASE_URL}/repairmen`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(repairmanData),
@@ -160,7 +163,7 @@ export const addRepairman = async (repairmanData) => {
 //обновление данных о ремонтнике
 export const updateRepairman = async (repairmanId, updatedData) => {
   try {
-    const response = await fetch(`http://localhost:3000/repairmen/${repairmanId}`, {
+    const response = await fetch(`${API_BASE_URL}/repairmen/${repairmanId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updatedData),
@@ -176,7 +179,7 @@ export const updateRepairman = async (repairmanId, updatedData) => {
 //список сервисных центров - при добавлении/редактировании ремонтника
 export const getServiceCenters = async () => {
   try {
-    const response = await axios.get("http://localhost:3000/repairmen/service-centers");
+    const response = await axios.get(`${API_BASE_URL}/repairmen/service-centers`);
     return response.data;
   } catch (error) {
     console.error("Ошибка при загрузке складов:", error);
@@ -187,7 +190,7 @@ export const getServiceCenters = async () => {
 //получение истории ремонтов самоката по id
 export const getScooterRepairs = async (scooterId) => {
   try {
-      const response = await axios.get(`http://localhost:3000/scooters/${scooterId}/repairs`);
+      const response = await axios.get(`${API_BASE_URL}/scooters/${scooterId}/repairs`);
       return response.data;
   } catch (error) {
       console.error("Ошибка при загрузке истории ремонтов:", error);
@@ -195,21 +198,10 @@ export const getScooterRepairs = async (scooterId) => {
   }
 };
 
-//получение всех данных о скутере по id
-// export const getScooterById = async (scooterId) => {
-//   try {
-//       const response = await axios.get(`http://localhost:3000/scooters/${scooterId}`);
-//       return response.data;
-//   } catch (error) {
-//       console.error("Ошибка при загрузке данных самоката:", error);
-//       return null;
-//   }
-// };
-
 //получение всех ремонтов конкретного ремонтника
 export const getRepairmanRepairs = async (repairmanId) => {
   try {
-      const response = await axios.get(`http://localhost:3000/repairmen/${repairmanId}/repairs`);
+      const response = await axios.get(`${API_BASE_URL}/repairmen/${repairmanId}/repairs`);
       return response.data;
   } catch (error) {
       console.error("Ошибка при получении истории ремонтов ремонтника:", error);
@@ -220,7 +212,7 @@ export const getRepairmanRepairs = async (repairmanId) => {
 //получение админских логов
 export const getAdminLogs = async () => {
   try {
-      const response = await axios.get("http://localhost:3000/logs");
+      const response = await axios.get(`${API_BASE_URL}/logs`);
       return response.data;
   } catch (error) {
       console.error("Ошибка при загрузке логов:", error);

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { searchScooter } from "../api";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const Home = ({ onSelectScooter }) => {
   const [query, setQuery] = useState("");
   const [scooter, setScooter] = useState(null);
@@ -34,6 +36,7 @@ const Home = ({ onSelectScooter }) => {
 
   return (
     <div className="page">
+      <p>Ваш внутренний IP для подключения с другого устройства в вашей сети: {API_BASE_URL.slice(0, -4)}8081</p>
       <h2>Ремонт самокатов</h2>
       <p>Введите номер существующего самоката (для теста можно взять SN-1001)</p>
       <h2>Поиск самоката</h2>

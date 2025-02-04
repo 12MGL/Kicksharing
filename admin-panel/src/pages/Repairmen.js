@@ -144,7 +144,7 @@ const Repairmen = () => {
               <td>{repairman.successful_repairs || 0}</td>
               <td>
                 <button onClick={() => handleEdit(repairman)} style={{marginRight:'5px'}}>Редактировать</button>
-                <button onClick={() => handleShowRepairs(repairman/*.id*/)} style={{marginRight:'5px'}}>История ремонтов</button>
+                <button onClick={() => handleShowRepairs(repairman)} style={{marginRight:'5px'}}>История ремонтов</button>
               </td>
             </tr>
           ))}

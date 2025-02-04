@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000"; //делаем динамический ip, чтобы при подключении с внешних устройств, нас пускало на бэкенд
 
 export const searchScooter = async (query) => {
   try {
@@ -40,7 +40,7 @@ export const getScooterDetails = async (id) => {
 
   export const updateRepair = async (scooterId, repairData) => {
     try {
-      const response = await fetch(`http://localhost:3000/repairs/${scooterId}`, {
+      const response = await fetch(`${API_URL}/repairs/${scooterId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(repairData),
@@ -56,7 +56,7 @@ export const getScooterDetails = async (id) => {
   export const addRepair = async (repairData) => {
     console.log("Перед отправкой запроса в бэкенд:", repairData);  //дебажноэ
     try {
-      const response = await axios.post("http://localhost:3000/repairs", repairData);
+      const response = await axios.post(`${API_URL}/repairs`, repairData);
       console.log("Ответ от сервера:", response.data); //дебажноэ
       return response.data.success;
     } catch (error) {
@@ -78,7 +78,7 @@ export const getScooterDetails = async (id) => {
 
   export const getRepairHistory = async (repairmanId) => {
     try {
-      const response = await fetch(`http://localhost:3000/repairmen/${repairmanId}/repairs`);
+      const response = await fetch(`${API_URL}/repairmen/${repairmanId}/repairs`);
       if (!response.ok) throw new Error("Ошибка загрузки истории ремонтов");
       return await response.json();
     } catch (error) {
@@ -89,7 +89,7 @@ export const getScooterDetails = async (id) => {
 
 export const login = async (username, password) => {
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

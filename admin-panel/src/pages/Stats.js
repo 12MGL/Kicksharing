@@ -16,6 +16,7 @@ const Stats = () => {
   const [filterServiceCenter, setFilterServiceCenter] = useState("all");
   const [repairmen, setRepairmen] = useState([]);
   const [uniqueServiceCenters, setUniqueServiceCenters] = useState([]);
+  const API_BASE_URL = process.env.REACT_APP_API_URL; //для скрипта обновления ip, чтобы можно было подключиться внутри сети с других устройств
 
 
   const [visibleColumns, setVisibleColumns] = useState({
@@ -71,8 +72,11 @@ const Stats = () => {
     useEffect(() => {        //функция для фильтров
 
         if (!stats || stats.length === 0) {
-            console.log("Данные ещё не загружены, не фильтруем.");
-            return;
+          console.log("ENV:", process.env.REACT_APP_API_URL);
+          console.log("API BASE URL:", API_BASE_URL);
+          console.log(API_BASE_URL);
+          console.log("Данные ещё не загружены, не фильтруем.");
+          return;
         }
         console.log("Фильтры обновлены. Обновляем таблицу..."); //дебажноэ
         let filtered = [...stats];
@@ -80,7 +84,6 @@ const Stats = () => {
 
         if (filterSuccess !== "all") {        //по успешности ремонта
         filtered = filtered.filter(item => {
-            // filterSuccess === "success" ? item.success : !item.success
             const match = filterSuccess === "success" ? item.success : !item.success;
             if (!match) console.log("Фильтр по успешности ОТБРАСЫВАЕТ:", item);     //дебажноэ
             return match;
@@ -89,7 +92,6 @@ const Stats = () => {
 
         if (filterRepairman !== "all") {        //по ремонтнику
         filtered = filtered.filter((item) => {
-            //item => item.repairman_name === filterRepairman
             const match = item.repairman_name === filterRepairman;
             if (!match) console.log("Фильтр по ремонтнику ОТБРАСЫВАЕТ:", item); //дебажноэ
             return match;    
@@ -97,7 +99,6 @@ const Stats = () => {
         }
 
         if (filterDateFrom) {        //по дате
-        //filtered = filtered.filter(item => new Date(item.repair_timestamp) >= new Date(filterDateFrom));
         filtered = filtered.filter(item => {
             const itemDate = new Date(item.repair_timestamp);
             const fromDate = new Date(filterDateFrom);
@@ -107,7 +108,6 @@ const Stats = () => {
         });
         }
         if (filterDateTo) {
-        //filtered = filtered.filter(item => new Date(item.repair_timestamp) <= new Date(filterDateTo));
         filtered = filtered.filter(item => {
             const itemDate = new Date(item.repair_timestamp);
             const toDate = new Date(filterDateTo);

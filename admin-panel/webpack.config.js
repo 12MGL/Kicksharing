@@ -1,10 +1,11 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
     entry: "./src/index.js",
     output: {
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, 'build'),
         filename: "bundle.js",
     },
     mode: "development",
@@ -30,12 +31,13 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "./public/index.html",
         }),
+        new Dotenv(),
     ],
     resolve: {
         extensions: [".js", ".jsx"],
     },
     devServer: {
-        static: path.join(__dirname, "dist"),
+        static: path.join(__dirname, 'build'),
         hot: true,
         historyApiFallback: true,
     },

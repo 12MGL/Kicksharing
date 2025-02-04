@@ -85,11 +85,6 @@ const Scooters = () => {
       } catch (error) {
           console.error("Ошибка при загрузке истории ремонтов:", error);
       }
-
-      // const repairs = await getScooterRepairs(scooterId);
-      // console.log("История ремонтов (ответ сервера):", repairs); //дебажноэ
-      // setScooterRepairs(repairs);
-      // setSelectedScooter(scooterId);
     };
 
     console.log(selectedScooter) //дебажноэ
