@@ -268,7 +268,9 @@ const Scooters = () => {
                     )}
                 </tbody>
             </table>
-            <button onClick={() => setSelectedScooter(null)}>Закрыть</button>
+            <button onClick={() => setSelectedScooter(null)}>
+                Закрыть
+            </button>
         </div>
     )}
     </div>
