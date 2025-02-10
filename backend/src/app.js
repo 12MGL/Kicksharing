@@ -32,7 +32,7 @@ app.use('/stats/parts', partsStatsRoutes);
 app.use('/parts', partsRoutes);
 app.use('/logs', logsRoutes);
 app.use("/auth", authRoutes);
-app.use(cors({ origin: "*", credentials: true }));
+//app.use(cors({ origin: "*", credentials: true }));
 
 app.get('/stats', (req, res) => {
     res.send('Statistics page');

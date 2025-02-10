@@ -268,7 +268,7 @@ const Scooters = () => {
                     )}
                 </tbody>
             </table>
-            <button onClick={() => setSelectedScooter({ id: scooterId, registration_number: repairs[0]?.registration_number || "Неизвестен" })}>Закрыть</button>
+            <button onClick={() => setSelectedScooter(null)}>Закрыть</button>
         </div>
     )}
     </div>

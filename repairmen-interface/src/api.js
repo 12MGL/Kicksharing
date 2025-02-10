@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000"; //делаем динамический ip, чтобы при подключении с внешних устройств, нас пускало на бэкенд
+const API_URL = `${process.env.REACT_APP_API_URL.slice(0, -4)}3000` || "http://localhost:3000"; //делаем динамический ip, чтобы при подключении с внешних устройств, нас пускало на бэкенд
 
 export const searchScooter = async (query) => {
   try {
