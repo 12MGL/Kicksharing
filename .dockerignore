@@ -1,7 +1,0 @@
-node_modules
-dist
-build
-.DS_Store
-.git
-npm-debug.log
-docker-compose.override.yml
